@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>enlightening.sk s.r.o. — digitálne projekty a online služby</title>
+<meta name="description" content="enlightening.sk s.r.o. — zázemie pre digitálne projekty, webové produkty a online služby." />
+<meta name="robots" content="index,follow" />
+
+<link rel="canonical" href="https://enlightening.sk/" />
+
+<style>
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  background:#0b1220;
+  color:#fff;
+  line-height:1.55;
+}
+.wrap{max-width:900px;margin:auto;padding:24px}
+a{color:#7dd3fc;text-decoration:none}
+a:hover{color:#fff}
+.card{
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:14px;
+  padding:18px;
+  margin-top:14px;
+  background:rgba(255,255,255,.04);
+}
+h1{margin:0 0 6px;font-size:20px}
+h2{margin:0 0 10px;font-size:16px}
+.muted{color:rgba(255,255,255,.7)}
+.proj{display:block;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,.12);margin-top:8px}
+footer{margin-top:20px;font-size:12px;color:rgba(255,255,255,.6)}
+</style>
+
+<!-- Organization structured data -->
+<script type="application/ld+json">
+{
+ "@context":"https://schema.org",
+ "@type":"Organization",
+ "name":"enlightening.sk s.r.o.",
+ "url":"https://enlightening.sk/"
+}
+</script>
+
+</head>
+<body>
+
+<div class="wrap">
+
+<header>
+<h1>enlightening.sk s.r.o.</h1>
+<div class="muted">Firemné zázemie pre digitálne projekty</div>
+</header>
+
+<div class="card">
+<h2>O spoločnosti</h2>
+<p class="muted">
+Enlightening.sk s.r.o. je spoločnosť zameraná na tvorbu digitálnych produktov,
+obsahových projektov a online služieb. Táto stránka slúži ako jednoduchý
+prehľad a dôveryhodný kontaktný bod.
+</p>
+</div>
+
+<div class="card">
+<h2>Projekty</h2>
+
+<!-- SwingPuzzles START LINK + AUTO LANG -->
+<a class="proj sp-start-link" href="https://start.swingpuzzles.com/">
+<strong>SwingPuzzles</strong><br/>
+<span class="muted">Online puzzle zážitok a obsahový projekt.</span>
+</a>
+
+<a class="proj" href="https://citimtedasom.sk/" target="_blank" rel="noopener">
+<strong>Cítim, teda som!</strong><br/>
+<span class="muted">Reflexívny obsahový projekt.</span>
+</a>
+
+<a class="proj" href="https://rodinnysebarozvoj.sk/" target="_blank" rel="noopener">
+<strong>Rodinný sebarozvoj</strong><br/>
+<span class="muted">Kurzy a webináre.</span>
+</a>
+
+</div>
+
+<div class="card">
+<h2>Kontakt</h2>
+<div class="muted">
+Email: <a href="mailto:info@enlightening.sk">info@enlightening.sk</a>
+</div>
+</div>
+
+<div class="card">
+<h2>Firemné údaje</h2>
+<div class="muted">
+Obchodné meno: enlightening.sk s.r.o.<br/>
+IČO: TODO<br/>
+Sídlo: TODO
+</div>
+</div>
+
+<footer>
+© <span id="y"></span> enlightening.sk s.r.o.
+</footer>
+
+</div>
+
+<script>
+/*
+  SwingPuzzles START jazyková detekcia
+  podporované jazyky: sk, cs, en, de, fr, it, es
+  fallback: en
+*/
+(function () {
+  const supported = ["sk","cs","en","de","fr","it","es"];
+  const fallback = "en";
+
+  function detectLang(){
+    const navLang = (navigator.language || navigator.userLanguage || "").toLowerCase();
+    const short = navLang.split("-")[0];
+    if(supported.includes(short)) return short;
+    return fallback;
+  }
+
+  const lang = detectLang();
+
+  document.querySelectorAll(".sp-start-link").forEach(a=>{
+    a.href = "https://start.swingpuzzles.com/?lang=" + lang;
+  });
+})();
+
+// rok vo footeri
+document.getElementById("y").textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>
