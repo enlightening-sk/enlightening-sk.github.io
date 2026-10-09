@@ -100,12 +100,31 @@
 <input type="text" name="company" maxlength="200" autocomplete="organization" />
 </label>
 
+<div class="hp" aria-hidden="true">
+<label>Company website <input type="text" name="company_website" tabindex="-1" autocomplete="off" /></label>
+</div>
+
+<!-- Public Turnstile site key. Replace YOUR_TURNSTILE_SITE_KEY before accepting live leads. -->
+<div class="cf-turnstile" data-sitekey="YOUR_TURNSTILE_SITE_KEY" data-theme="dark"></div>
+<script>
+(function () {
+  var widget = document.querySelector(".cf-turnstile");
+  var key = widget && widget.getAttribute("data-sitekey");
+  if (!key || key === "YOUR_TURNSTILE_SITE_KEY") return;
+  var script = document.createElement("script");
+  script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+  script.async = true;
+  script.defer = true;
+  document.head.appendChild(script);
+})();
+</script>
+
 <p id="form-error" class="form-error" hidden>The project brief could not be sent. Please try again in a moment.</p>
 
 <button class="btn" type="submit">Send my project →</button>
 
 <p class="muted">I'll personally review what you send. If it looks like something I can help with, I'll get back to you to clarify any important details or suggest the next step.</p>
-<p class="muted">Your information will only be used to respond to your inquiry.</p>
+<p class="muted">Your information will only be used to respond to your inquiry. <a href="/privacy/">Privacy</a></p>
 
 </form>
 
@@ -115,6 +134,7 @@
 enlightening.sk s.r.o.<br/>
 Company ID (IČO): 54864895<br/>
 <a href="mailto:info@enlightening.sk">info@enlightening.sk</a><br/>
+<a href="/privacy/">Privacy</a><br/>
 © <span id="y">2026</span> enlightening.sk s.r.o.
 </footer>
 
@@ -123,12 +143,8 @@ Company ID (IČO): 54864895<br/>
 <script>
 document.getElementById("y").textContent = new Date().getFullYear();
 
-/*
-  FORM_ENDPOINT stays empty until submissions can be stored.
-  With no endpoint, a valid form still opens the thank-you page and keeps
-  the brief in this browser only. Nothing is emailed or saved on the server.
-*/
-var FORM_ENDPOINT = "";
+var FORM_ENDPOINT = "/api/lead";
+var loadedAt = Date.now();
 
 var form = document.getElementById("brief");
 var error = document.getElementById("form-error");
@@ -142,15 +158,12 @@ form.addEventListener("submit", function (event) {
   submit.disabled = true;
 
   var data = Object.fromEntries(new FormData(form).entries());
-
-  var done = function () {
-    try { sessionStorage.setItem("software-brief", JSON.stringify(data)); } catch (ignore) {}
-    location.href = "/software/thanks/";
-  };
-
-  if (!FORM_ENDPOINT) {
-    done();
-    return;
+  data.loadedAt = loadedAt;
+  if (window.turnstile && !data["cf-turnstile-response"]) {
+    try {
+      var token = turnstile.getResponse();
+      if (token) data["cf-turnstile-response"] = token;
+    } catch (ignore) {}
   }
 
   fetch(FORM_ENDPOINT, {
@@ -159,7 +172,14 @@ form.addEventListener("submit", function (event) {
     body: JSON.stringify(data)
   }).then(function (response) {
     if (!response.ok) throw new Error("request failed");
-    done();
+    try {
+      var brief = Object.assign({}, data);
+      delete brief.company_website;
+      delete brief["cf-turnstile-response"];
+      delete brief.loadedAt;
+      sessionStorage.setItem("software-brief", JSON.stringify(brief));
+    } catch (ignore) {}
+    location.href = "/software/thanks/";
   }).catch(function () {
     submit.disabled = false;
     error.hidden = false;
