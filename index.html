@@ -4,11 +4,23 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<title>enlightening.sk s.r.o. — digitálne projekty a online služby</title>
-<meta name="description" content="enlightening.sk s.r.o. — zázemie pre digitálne projekty, webové produkty a online služby." />
+<title>enlightening.sk s.r.o. — SwingPuzzles, sedenia a rodinné kurzy</title>
+<meta name="description" content="enlightening.sk s.r.o. prevádzkuje SwingPuzzles, Cítim, teda som a Rodinný sebarozvoj — online 3D puzzle, individuálne sedenia a rodinné kurzy." />
 <meta name="robots" content="index,follow" />
+<meta name="theme-color" content="#0b1220" />
 
 <link rel="canonical" href="https://enlightening.sk/" />
+
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="sk_SK" />
+<meta property="og:site_name" content="enlightening.sk s.r.o." />
+<meta property="og:url" content="https://enlightening.sk/" />
+<meta property="og:title" content="enlightening.sk s.r.o. — SwingPuzzles, sedenia a rodinné kurzy" />
+<meta property="og:description" content="Prehľad projektov spoločnosti enlightening.sk s.r.o.: bezplatné online 3D puzzle SwingPuzzles, individuálne sedenia Cítim, teda som a kurzy Rodinný sebarozvoj." />
+
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="enlightening.sk s.r.o. — SwingPuzzles, sedenia a rodinné kurzy" />
+<meta name="twitter:description" content="Prehľad projektov spoločnosti enlightening.sk s.r.o.: bezplatné online 3D puzzle SwingPuzzles, individuálne sedenia Cítim, teda som a kurzy Rodinný sebarozvoj." />
 
 <style>
 body{
@@ -31,17 +43,114 @@ a:hover{color:#fff}
 h1{margin:0 0 6px;font-size:20px}
 h2{margin:0 0 10px;font-size:16px}
 .muted{color:rgba(255,255,255,.7)}
-.proj{display:block;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,.12);margin-top:8px}
+.projects{list-style:none;padding:0;margin:0}
+.proj{
+  display:block;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.12);
+  margin-top:8px;
+}
+.proj h3{margin:0 0 6px;font-size:16px;font-weight:700}
+.proj p{margin:0}
+.proj p+p{margin-top:8px}
 footer{margin-top:20px;font-size:12px;color:rgba(255,255,255,.6)}
 </style>
 
-<!-- Organization structured data -->
 <script type="application/ld+json">
 {
- "@context":"https://schema.org",
- "@type":"Organization",
- "name":"enlightening.sk s.r.o.",
- "url":"https://enlightening.sk/"
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://enlightening.sk/#organization",
+      "name": "enlightening.sk s.r.o.",
+      "legalName": "enlightening.sk s.r.o.",
+      "url": "https://enlightening.sk/",
+      "email": "info@enlightening.sk",
+      "identifier": {
+        "@type": "PropertyValue",
+        "propertyID": "IČO",
+        "value": "54864895"
+      },
+      "description": "Spoločnosť, ktorá vyvíja a prevádzkuje vlastné digitálne produkty a online služby."
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://enlightening.sk/#website",
+      "url": "https://enlightening.sk/",
+      "name": "enlightening.sk s.r.o.",
+      "inLanguage": "sk",
+      "publisher": { "@id": "https://enlightening.sk/#organization" }
+    },
+    {
+      "@type": "AboutPage",
+      "@id": "https://enlightening.sk/#webpage",
+      "url": "https://enlightening.sk/",
+      "name": "enlightening.sk s.r.o. — SwingPuzzles, sedenia a rodinné kurzy",
+      "description": "enlightening.sk s.r.o. prevádzkuje SwingPuzzles, Cítim, teda som a Rodinný sebarozvoj — online 3D puzzle, individuálne sedenia a rodinné kurzy.",
+      "inLanguage": "sk",
+      "isPartOf": { "@id": "https://enlightening.sk/#website" },
+      "about": { "@id": "https://enlightening.sk/#organization" },
+      "mainEntity": { "@id": "https://enlightening.sk/#projects" }
+    },
+    {
+      "@type": "ItemList",
+      "@id": "https://enlightening.sk/#projects",
+      "name": "Projekty enlightening.sk s.r.o.",
+      "itemListOrder": "https://schema.org/ItemListOrderAscending",
+      "numberOfItems": 3,
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "item": {
+            "@type": "WebApplication",
+            "@id": "https://swingpuzzles.com/sk/#app",
+            "name": "SwingPuzzles",
+            "url": "https://swingpuzzles.com/sk/",
+            "applicationCategory": "GameApplication",
+            "operatingSystem": "Web",
+            "inLanguage": ["sk", "cs", "en", "de", "fr", "it", "es"],
+            "isAccessibleForFree": true,
+            "description": "Bezplatné online 3D puzzle v prehliadači. Každý deň nový historický príbeh, skladanie dielikov so skutočnou hĺbkou a personalizovaný puzzle z vlastnej fotografie.",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "EUR"
+            },
+            "publisher": { "@id": "https://enlightening.sk/#organization" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "item": {
+            "@type": "WebSite",
+            "@id": "https://citimtedasom.sk/#website",
+            "name": "Cítim, teda som",
+            "url": "https://citimtedasom.sk/",
+            "inLanguage": "sk",
+            "description": "Individuálne online sedenia Michala Mihálika o vzťahoch, rodine a životných témach, s možnosťou práce s rodinnými konšteláciami.",
+            "publisher": { "@id": "https://enlightening.sk/#organization" }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "item": {
+            "@type": "WebSite",
+            "@id": "https://rodinnysebarozvoj.sk/#website",
+            "name": "Rodinný sebarozvoj",
+            "url": "https://rodinnysebarozvoj.sk/",
+            "inLanguage": "sk",
+            "description": "Kurzy, webináre a osobné sprevádzanie Evy Mihálikovej pre hypersenzitívnych ľudí, deti a ich rodičov.",
+            "publisher": { "@id": "https://enlightening.sk/#organization" }
+          }
+        }
+      ]
+    }
+  ]
 }
 </script>
 
@@ -52,53 +161,73 @@ footer{margin-top:20px;font-size:12px;color:rgba(255,255,255,.6)}
 
 <header>
 <h1>enlightening.sk s.r.o.</h1>
-<div class="muted">Firemné zázemie pre digitálne projekty</div>
+<div class="muted">Digitálne produkty a online služby</div>
 </header>
 
-<div class="card">
-<h2>O spoločnosti</h2>
+<main>
+
+<section class="card" aria-labelledby="about-heading">
+<h2 id="about-heading">O spoločnosti</h2>
 <p class="muted">
-Enlightening.sk s.r.o. je spoločnosť zameraná na tvorbu digitálnych produktov,
-obsahových projektov a online služieb. Táto stránka slúži ako jednoduchý
-prehľad a dôveryhodný kontaktný bod.
+enlightening.sk s.r.o. vyvíja a prevádzkuje vlastné digitálne produkty a online služby.
+Táto stránka je prehľadom projektov, kontaktným bodom a zdrojom základných firemných údajov.
 </p>
-</div>
+</section>
 
-<div class="card">
-<h2>Projekty</h2>
+<section class="card" aria-labelledby="projects-heading">
+<h2 id="projects-heading">Projekty</h2>
+<p class="muted">
+Nižšie sú projekty, ktoré spoločnosť prevádzkuje. Každý odkaz vedie na vlastnú stránku projektu.
+</p>
 
-<!-- SwingPuzzles START LINK + AUTO LANG -->
-<a class="proj sp-start-link" href="https://start.swingpuzzles.com/">
-<strong>SwingPuzzles</strong><br/>
-<span class="muted">Online puzzle zážitok a obsahový projekt.</span>
-</a>
+<ul class="projects">
 
-<a class="proj" href="https://citimtedasom.sk/" target="_blank" rel="noopener">
-<strong>Cítim, teda som!</strong><br/>
-<span class="muted">Reflexívny obsahový projekt.</span>
-</a>
+<li class="proj">
+<h3><a class="sp-home-link" href="https://swingpuzzles.com/sk/">SwingPuzzles — bezplatné online 3D puzzle</a></h3>
+<p class="muted">
+Bezplatná puzzle hra v prehliadači, bez sťahovania. Každý deň pribudne historický moment:
+obrázok zložíte z dielikov so skutočnou hĺbkou a k nemu si prečítate príbeh, fakty a súvislosti.
+Hra je vo viacerých jazykoch a z vlastnej fotografie sa dá vytvoriť personalizovaný puzzle darček.
+</p>
+<p><a class="sp-start-link" href="https://start.swingpuzzles.com/?lang=sk">Denná zaujímavosť a malé puzzle e-mailom</a></p>
+</li>
 
-<a class="proj" href="https://rodinnysebarozvoj.sk/" target="_blank" rel="noopener">
-<strong>Rodinný sebarozvoj</strong><br/>
-<span class="muted">Kurzy a webináre.</span>
-</a>
+<li class="proj">
+<h3><a href="https://citimtedasom.sk/" target="_blank" rel="noopener">Cítim, teda som — online sedenia o vzťahoch a rodine</a></h3>
+<p class="muted">
+Individuálne online sedenia Michala Mihálika o vzťahoch, rodine, deťoch a ďalších životných témach.
+Sedenie je priestor na vypočutie. Keď to dáva zmysel, môže pokračovať jemnou prácou s rodinnými konšteláciami.
+Stretnutie prebieha online a trvá približne hodinu.
+</p>
+</li>
 
-</div>
+<li class="proj">
+<h3><a href="https://rodinnysebarozvoj.sk/" target="_blank" rel="noopener">Rodinný sebarozvoj — kurzy a webináre pre rodičov</a></h3>
+<p class="muted">
+Kurzy, webináre a osobné sprevádzanie s Evou Mihálikovou pre hypersenzitívnych ľudí, deti a ich rodičov.
+Témy zahŕňajú vedomé rodičovstvo, hranice, emócie, materstvo a rodinné vzťahy, od online kurzov po kruhy a rituály.
+</p>
+</li>
 
-<div class="card">
-<h2>Kontakt</h2>
+</ul>
+</section>
+
+<section class="card" aria-labelledby="contact-heading">
+<h2 id="contact-heading">Kontakt</h2>
 <div class="muted">
 Email: <a href="mailto:info@enlightening.sk">info@enlightening.sk</a>
 </div>
-</div>
+</section>
 
-<div class="card">
-<h2>Firemné údaje</h2>
+<section class="card" aria-labelledby="company-heading">
+<h2 id="company-heading">Firemné údaje</h2>
 <div class="muted">
 Obchodné meno: enlightening.sk s.r.o.<br/>
 IČO: 54864895
 </div>
-</div>
+</section>
+
+</main>
 
 <footer>
 © <span id="y">2026</span> enlightening.sk s.r.o.
@@ -108,9 +237,11 @@ IČO: 54864895
 
 <script>
 /*
-  SwingPuzzles START jazyková detekcia
+  SwingPuzzles jazyková detekcia
   podporované jazyky: sk, cs, en, de, fr, it, es
   fallback: en
+  Domovská stránka hry: https://swingpuzzles.com/{lang}/
+  Denný e-mail: https://start.swingpuzzles.com/?lang={lang}
 */
 (function () {
   const supported = ["sk","cs","en","de","fr","it","es"];
@@ -125,12 +256,15 @@ IČO: 54864895
 
   const lang = detectLang();
 
+  document.querySelectorAll(".sp-home-link").forEach(a=>{
+    a.href = "https://swingpuzzles.com/" + lang + "/";
+  });
+
   document.querySelectorAll(".sp-start-link").forEach(a=>{
     a.href = "https://start.swingpuzzles.com/?lang=" + lang;
   });
 })();
 
-// rok vo footeri
 document.getElementById("y").textContent = new Date().getFullYear();
 </script>
 
