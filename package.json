@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "tsc && node --test tests/*.test.js"
+    "test": "tsc && node --test --experimental-test-isolation=process tests/*.test.js"
   },
   "engines": {
     "node": ">=22"
