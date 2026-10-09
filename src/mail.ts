@@ -1,7 +1,10 @@
 import type { Env } from "./env.js";
 import type { StoredLead } from "./db.js";
 
-const FROM = "enlightening.sk <michal@enlightening.sk>";
+function fromAddress(name: string, email: string): string {
+  const safeName = name.replace(/[\r\n<>"]/g, "").trim();
+  return `${safeName} <${email.trim()}>`;
+}
 
 function briefText(lead: StoredLead): string {
   return [
@@ -22,7 +25,7 @@ function briefText(lead: StoredLead): string {
 }
 
 export async function notifyLead(env: Env, lead: StoredLead): Promise<void> {
-  if (!env.resendApiKey || !env.leadNotifyEmail) {
+  if (!env.resendApiKey || !env.resendFromEmail || !env.resendFromName) {
     throw new Error("Resend is not configured");
   }
 
@@ -34,8 +37,8 @@ export async function notifyLead(env: Env, lead: StoredLead): Promise<void> {
       "content-type": "application/json",
     },
     body: JSON.stringify({
-      from: FROM,
-      to: [env.leadNotifyEmail],
+      from: fromAddress(env.resendFromName, env.resendFromEmail),
+      to: [env.resendFromEmail],
       reply_to: lead.email,
       subject: `Project brief from ${subjectName}`,
       text: briefText(lead),
@@ -43,5 +46,8 @@ export async function notifyLead(env: Env, lead: StoredLead): Promise<void> {
     signal: AbortSignal.timeout(10_000),
   });
 
-  if (!response.ok) throw new Error(`Resend responded ${response.status}`);
+  if (!response.ok) {
+    const detail = (await response.text()).replace(/\s+/g, " ").trim().slice(0, 300);
+    throw new Error(`Resend responded ${response.status}${detail ? `: ${detail}` : ""}`);
+  }
 }

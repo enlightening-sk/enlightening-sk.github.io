@@ -11,7 +11,8 @@ export type Env = {
   mysqlPassword: string;
   mysqlDatabase: string;
   resendApiKey: string;
-  leadNotifyEmail: string;
+  resendFromEmail: string;
+  resendFromName: string;
   turnstileSecret: string;
   turnstileSkip: boolean;
   ipHashSalt: string;
@@ -78,10 +79,11 @@ export function getEnv(): Env {
   }
 
   const resendApiKey = process.env.RESEND_API_KEY ?? "";
-  const leadNotifyEmail = process.env.LEAD_NOTIFY_EMAIL ?? "";
-  if (!resendApiKey || !leadNotifyEmail) {
+  const resendFromEmail = process.env.RESEND_FROM_EMAIL ?? "";
+  const resendFromName = process.env.RESEND_FROM_NAME ?? "";
+  if (!resendApiKey || !resendFromEmail || !resendFromName) {
     console.error(
-      "RESEND_API_KEY or LEAD_NOTIFY_EMAIL is missing; lead email will fail without blocking storage",
+      "RESEND_API_KEY, RESEND_FROM_EMAIL, or RESEND_FROM_NAME is missing; lead email will fail without blocking storage",
     );
   }
 
@@ -95,7 +97,8 @@ export function getEnv(): Env {
     mysqlPassword: process.env.MYSQL_PASSWORD ?? "",
     mysqlDatabase: requireValue("MYSQL_DATABASE"),
     resendApiKey,
-    leadNotifyEmail,
+    resendFromEmail,
+    resendFromName,
     turnstileSecret,
     turnstileSkip: skipAsked && nodeEnv !== "production",
     ipHashSalt: requireValue("IP_HASH_SALT"),
