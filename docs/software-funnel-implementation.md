@@ -92,7 +92,7 @@ Povolené hodnoty kopíruj znak po znaku z `software/contact/index.html` (vráta
 5. Skontroluj polia a allowlist.
 6. Vlož riadok do `leads`.
 7. Až po úspešnom INSERTe vráť 200. Zlyhanie mailu lead nemaže a klientovi neukazuje chybu.
-8. Resend pošle celý brief na `LEAD_NOTIFY_EMAIL` (`info@enlightening.sk`). `reply-to` je e-mail z formulára. Automatická odpoveď návštevníkovi v tejto verzii nie je.
+8. Resend pošle celý brief na `LEAD_NOTIFY_EMAIL` (`michal@enlightening.sk`). `reply-to` je e-mail z formulára. Automatická odpoveď návštevníkovi v tejto verzii nie je.
 
 HTTP: 400 validačná chyba, 403 Turnstile alebo honeypot, 429 rate limit, 500 pád databázy. Telo môže byť krátke JSON `{ "ok": false }`. Klient ho nerozlišuje.
 
@@ -144,11 +144,11 @@ Pred ostrým prijatím leadov pridaj krátku anglickú stránku `/privacy/` a od
 
 Text stránky:
 
-- prevádzkovateľ: enlightening.sk s.r.o., IČO 54864895, info@enlightening.sk
+- prevádzkovateľ: enlightening.sk s.r.o., IČO 54864895, michal@enlightening.sk
 - účel: posúdenie dopytu pred prípadnou zmluvou
 - čo sa ukladá: polia formulára, čas, hash IP, user agent
 - ako dlho: 24 mesiacov od odoslania, ak z dopytu nevznikne zmluva
-- mail s briefom ide na info@enlightening.sk cez Resend
+- mail s briefom ide na michal@enlightening.sk cez Resend
 
 Homepage firemnú pätičku nerozširuj o celý funnel. Stačí existujúci odkaz na `/software/`.
 

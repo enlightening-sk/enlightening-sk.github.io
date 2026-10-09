@@ -1,7 +1,7 @@
 import type { Env } from "./env.js";
 import type { StoredLead } from "./db.js";
 
-const FROM = "enlightening.sk <info@enlightening.sk>";
+const FROM = "enlightening.sk <michal@enlightening.sk>";
 
 function briefText(lead: StoredLead): string {
   return [
