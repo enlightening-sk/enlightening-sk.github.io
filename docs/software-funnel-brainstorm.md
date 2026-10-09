@@ -1,7 +1,8 @@
 # Software funnel — prvotný brainstorm
 
 Interný záznam z komunikácie s marketingovým agentom, 9. októbra 2026.
-Nie je to zadanie na implementáciu. Customer-facing texty sú v angličtine, lebo cieľové publikum je USA.
+Customer-facing texty sú v angličtine, lebo cieľové publikum je USA.
+Implementačné zadanie je v `docs/software-funnel-implementation.md`. Tento súbor je zdroj textov a marketingových rozhodnutí.
 
 Homepage `enlightening.sk` zostáva firemná stránka. Funnel je samostatná vetva. Homepage je už preložená do angličtiny; agent ju videl ešte v slovenčine. Slovenskú verziu webu nerobíme.
 
@@ -114,32 +115,15 @@ Príklad tónu prvej odpovede je v pôvodnej komunikácii (pomalé .NET reporty 
 - Prepis homepage na sales page
 - Slovenská verzia funnelu
 
-## Otvorené pred stavbou stránok
+## Stav po statických stránkach
 
-Anglický text troch strán je v sekcii V1 copy. Pred kódom ostáva:
+Landing, formulár a thank-you page sú v `software/`. Case studies sú na landingu ako návrh a dajú sa upraviť bez čakania na backend. Fotka v About zatiaľ nie je.
 
-- Potvrdiť alebo upraviť štyri case studies. Sú označené ako návrh a na web idú až po tvojom súhlase.
-- Fotka do sekcie About, ak ju chceš na prvej verzii.
-- Privacy stránka patrí k ostrému formuláru, nie k prvému statickému zloženiu. Na formulári zatiaľ stačí veta z copy.
-
-Na `/software` nebude bežná navigácia. Logo vedie na homepage. Pätička má firmu a neskôr privacy. Jedna hlavná cesta: CTA na formulár.
-
-## Technické predpoklady (mimo marketingového vlákna)
-
-GitHub Pages formulár neuloží a nepošle mail. Statické stránky vedia vzniknúť aj skôr. Ostrý formulár potrebuje backend (predtým: alwaysdata, databáza, Cloudflare Turnstile, voliteľne Resend) a krátku privacy poznámku: slovenská s.r.o. je prevádzkovateľ, účel je posúdenie zákazky pred zmluvou.
-
-Meranie: ad click → LandingView → ContactView → FormSubmit → QualifiedLead.
-
-## Ďalšie kroky
-
-1. Potvrdiť alebo upraviť štyri case studies.
-2. Zložiť statické `/software`, `/software/contact` a `/software/thanks`. Homepage nechať ako firemný prehľad.
-3. Samostatne zapojiť uloženie formulára, ochranu proti spamu, mail a privacy stránku.
-4. Video skripty až z tohto textu, aby medzi reklamou, landingom a formulárom nebola medzera v sľube.
+Uloženie formulára, Turnstile, Resend, MariaDB, privacy stránka a presun z GitHub Pages na alwaysdata sú v `docs/software-funnel-implementation.md`. Backend je Node.js a TypeScript, nie PHP.
 
 ## V1 copy
 
-Text od marketingového agenta, 9. októbra 2026. Okrem case studies je pripravený na stavbu.
+Text od marketingového agenta, 9. októbra 2026. Stránky z neho už stoja v `software/`. Case studies sú zverejnený návrh.
 
 ### `/software`
 
