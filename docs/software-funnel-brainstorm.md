@@ -1,6 +1,6 @@
 # Software funnel — prvotný brainstorm
 
-Interný záznam z komunikácie s marketingovým agentom, 9. októbra 2026.
+Interný záznam z komunikácie s marketingovým agentom, 9. a 10. októbra 2026.
 Customer-facing texty sú v angličtine, lebo cieľové publikum je USA.
 Implementačné zadanie je v `docs/software-funnel-implementation.md`. Tento súbor je zdroj textov a marketingových rozhodnutí.
 
@@ -20,6 +20,7 @@ Homepage `enlightening.sk` zostáva firemná stránka. Funnel je samostatná vet
   - Backend / integrations: „We need an experienced engineer to build/connect the part behind our product.“
 - MVP development je na landingu len sekundárna capability. Do prvých reklám nejde.
 - Message-matched landingy (`/software/backend`, `/software/ai`, …) až podľa dát. Vo V1 všetky reklamy vedú na jeden landing.
+- Meranie sa stavia ešte pred prvou platenou kampaňou. Model eventov z 10. októbra je v sekcii Meranie. Názvy z 9. októbra (LandingView, ContactView, FormSubmit) sa nepoužijú.
 
 ## Tri vrstvy
 
@@ -50,14 +51,14 @@ Nie „hire a senior developer“, nie zoznam technológií, nie „book a free 
 
 Route V1:
 
-| Krok | URL | Event |
-| --- | --- | --- |
-| Landing | `/software` | LandingView |
-| Formulár | `/software/contact` | ContactView |
-| Odoslanie | `/software/thanks` | FormSubmit |
-| Lead, s ktorým chceš reálne pracovať | ručne po posúdení | QualifiedLead |
+| Krok | URL | Event | Odkiaľ |
+| --- | --- | --- | --- |
+| Landing | `/software` | PageView | Pixel |
+| Otvorenie formulára | `/software/contact` | ViewContent | Pixel |
+| Backend prijal platný formulár | `POST /api/lead` | Lead | Pixel + CAPI, jeden event |
+| Lead, s ktorým chceš reálne pracovať | ručne po posúdení | QualifiedLead | neskôr CAPI |
 
-QualifiedLead nie je odoslanie formulára. Formulár s nízkym budgetom alebo zlým fitom zostáva FormSubmit.
+Lead nie je klik na Send ani otvorenie `/software/thanks`. Klik na Tell me about your project samostatný event nemá. QualifiedLead nie je odoslanie formulára.
 
 Neskoršie, až podľa dát: `/software/backend`, `/software/ai`, `/software/dotnet`, `/software/integrations`.
 
@@ -104,6 +105,73 @@ Marketing končí odoslaním briefu. Ďalej je consultative selling.
 
 Príklad tónu prvej odpovede je v pôvodnej komunikácii (pomalé .NET reporty nad SQL Serverom a banking performance case).
 
+## Meranie
+
+Záznam z 10. októbra 2026. Doplniť pred prvým dolárom na tri reklamné uhly. Dodatočné meranie by prišlo o dáta z prvého testu.
+
+Pixel povie, čo návštevník robil. CAPI potvrdí, že vznikol skutočný lead. Databáza povie, či to bol dobrý lead. Neskôr CAPI pošle túto kvalitu späť do Meta. V Ads Manageri má časom prestať stačiť cost per lead. Ďalší cieľ je cost per qualified lead a nakoniec customer acquisition cost. Pri $95/h je jeden klient na 100 hodín $9 500. Optimalizácia na najlacnejší formulár je zavádzajúca.
+
+Príklad, prečo vlastná databáza rozhoduje inak než Meta CPL:
+
+| Lead | Angle | Creative | Meta Lead | Qualified | Contract |
+| --- | --- | --- | --- | --- | --- |
+| A | AI | video_01 | áno | áno | áno |
+| B | AI | video_02 | áno | nie | |
+| C | Legacy | video_01 | áno | áno | áno |
+| D | Backend | video_03 | áno | nie | |
+
+Meta môže ukázať AI video za $38/lead. Databáza môže ukázať AI 10 leadov a 1 qualified, Legacy 5 leadov, 4 qualified a 2 contracts. Vyšší CPL na Legacy je potom vedľajší.
+
+### Eventy V1
+
+Celý funnel: Meta ad → `/software` → `/software/contact` → úspešný lead → neskôr qualified lead.
+
+- `/software`: PageView, Pixel.
+- `/software/contact`: PageView + ViewContent, Pixel. To stačí namiesto eventu za klik na Tell me about your project.
+- Úspešný `POST /api/lead`: Lead, Pixel aj CAPI. Najdôležitejší event V1. Zdroj pravdy je, že backend prijal validný formulár.
+- Michal označí lead ako relevantný: QualifiedLead, neskôr len CAPI.
+
+Na `/software/thanks` sa Lead nespúšťa. Refresh, história alebo priama URL by vyrobili falošnú konverziu.
+
+Dva príklady posúdenia:
+
+- „Can you build me an AI SaaS for $200?“ je Lead a nie je QualifiedLead.
+- „We're running a .NET application with SQL Server and need someone to investigate recurring performance problems. We expect 20–40 hours initially.“ je Lead aj QualifiedLead.
+
+Neskorší funnel, až bude QualifiedLead a výhra odchádzať do Meta: PageView → ViewContent → Lead → QualifiedLead → Contract / Won.
+
+### Pixel a CAPI
+
+Pixel beží na funnel stránkach a sleduje návštevu. CAPI ide zo servera až po úspešnom uložení leadu. Server v tej chvíli vie, že Turnstile prešiel, request je validný, lead je v databáze, a má email, meno, prípadne company a metadata requestu. To je kvalitnejší signál než samotný browser.
+
+Do CAPI patria len matching údaje: hashed email, hashed meno (first/last len keď sa dajú spoľahlivo rozdeliť), client IP, user agent, `_fbp` a `_fbc`, keď existuje. Email a meno sa hashujú SHA-256. Prehliadač má `_fbp` a `_fbc` poslať spolu s formulárom na `/api/lead`.
+
+Úspešný lead ide dvoma cestami a Meta ho musí vidieť ako jeden Lead. Pre každý submit prehliadač vygeneruje `event_id` (UUID). Pixel pošle Lead s týmto `eventID`, rovnaké `event_id` dostane `/api/lead` a CAPI. Deduplikácia je dôležitejšia než ďalšie eventy.
+
+Pixel ID je hodnota v prostredí, nie literál v kóde. CAPI access token je len server-side secret.
+
+### UTM a fbclid
+
+Okrem Meta sa pri návšteve uložia `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term` a `fbclid`. Pri leade sa zapíšu do MariaDB. Z nich neskôr vznikne porovnanie angle / creative / qualified / contract z tabuľky vyššie.
+
+### Stav leadu
+
+QualifiedLead bude možno najdôležitejší event, aj keď admin UI teraz nie je. Po formulári vznikne Lead so stavom nový. Kvalitu nastavíš ručne, zo začiatku SQL príkazom alebo malým interným scriptom.
+
+Agent navrhol hodnoty `new`, `qualified`, `unqualified`, `contacted`, `won`, `lost`. V schéme už je pipeline `new`, `replied`, `call`, `won`, `not_fit` a samostatný stĺpec `qualified`. Ten stĺpec je príznak QualifiedLead. Implementačné zadanie pipeline neprepisuje.
+
+### Súhlas
+
+EU firma a Meta Pixel. Pixel sa nespúšťa pred marketingovým súhlasom tam, kde je súhlas právne potrebný. CAPI súhlas neobchádza: stále ide o odoslanie údajov tretej strane na reklamu a meranie.
+
+Necessary cookies vždy. Marketing / Meta podľa súhlasu. Privacy policy popisuje Meta Pixel, CAPI a spracovanie leadov. Režim pre US kampaň a pre EU návštevníka sa má dať meniť podľa krajiny a súhlasu. Natvrdo „Meta vždy“ v implementácii nie je.
+
+### Čo z toho ide do V1
+
+V1 má mať: Pixel na funnel stránkach, CAPI na úspešný `/api/lead`, spoločné `event_id`, `_fbp` a `_fbc`, UTM + `fbclid` pri leade, databázu pripravenú na qualified, načítanie Meta podľa súhlasu a overenie cez Meta Test Events pred launchom.
+
+V1 nemá: Calendly, admin UI, `/software/ai`, attribution dashboard ani ďalšie custom eventy. QualifiedLead do Meta odíde až v ďalšej verzii.
+
 ## Čo zámerne nie je vo V1
 
 - Sedem tém a message-matched URL naraz
@@ -114,12 +182,15 @@ Príklad tónu prvej odpovede je v pôvodnej komunikácii (pomalé .NET reporty 
 - Fixed price
 - Prepis homepage na sales page
 - Slovenská verzia funnelu
+- Admin UI, attribution dashboard a eventy navyše oproti modelu v sekcii Meranie
+- Lead odvodený z otvorenia `/software/thanks/` alebo z kliku na Tell me about your project
+- Natvrdo zapnutý Meta Pixel bez súhlasu tam, kde je súhlas potrebný
 
 ## Stav po statických stránkach
 
 Landing, formulár a thank-you page sú v `software/`. Case studies sú na landingu ako návrh a dajú sa upraviť bez čakania na backend. Fotka v About zatiaľ nie je.
 
-Uloženie formulára, Turnstile, Resend, MariaDB, privacy stránka a presun z GitHub Pages na alwaysdata sú v `docs/software-funnel-implementation.md`. Backend je Node.js a TypeScript, nie PHP.
+Uloženie formulára, Turnstile, Resend, MariaDB, privacy stránka a presun z GitHub Pages na alwaysdata sú v `docs/software-funnel-implementation.md`. Backend je Node.js a TypeScript, nie PHP. Pixel, CAPI, súhlas a atribúcia z 10. októbra sú v tom istom zadaní, v sekcii Meranie, a v kóde zatiaľ nie sú.
 
 ## V1 copy
 

@@ -1,12 +1,12 @@
 # Software funnel — rozhodnutia na implementáciu
 
-Toto je zadanie pre ďalšieho agenta. Marketingový záznam a anglický text stránok sú v `docs/software-funnel-brainstorm.md`. Tu sa už nerozhoduje stratégia. Tu sa stavia uloženie formulára.
+Toto je zadanie pre ďalšieho agenta. Marketingový záznam a anglický text stránok sú v `docs/software-funnel-brainstorm.md`. Tu sa už nerozhoduje stratégia. Uloženie formulára je v repozitári. Ďalšie zadanie je sekcia Meranie.
 
 Customer-facing text je anglický. Cieľové publikum je USA. Slovenskú verziu webu nerobíme.
 
 ## Čo už je v repozitári
 
-Nemeň text ani štruktúru týchto stránok, okrem bodov v sekcii Úpravy formulára a privacy.
+Nemeň text ani štruktúru týchto stránok, okrem bodov v sekciách Úpravy formulára, Privacy a Meranie.
 
 - `index.html` — anglická firemná homepage. Odkaz na software engineering vedie na `/software/`.
 - `software/index.html` — landing. Bez bežnej navigácie. Logo vedie na `/`.
@@ -23,8 +23,8 @@ Case studies na landingu sú zverejnený návrh a môžu sa neskôr upraviť. Ba
 - V1 route: reklama → `/software/` → `/software/contact/` → `/software/thanks/` → osobná odpoveď → call → hourly ponuka → Upwork.
 - Sadzba na stránke: from $95/hour. V reklame cena nie je.
 - Tri reklamné uhly neskôr: existing software, AI / LLM, backend / integrations. MVP je len karta na landingu.
-- Message-matched URL (`/software/ai` a podobne), Calendly, Meta Pixel a video skripty do tohto zadania nepatria.
-- Meranie, až keď bude reklama: LandingView, ContactView, FormSubmit, QualifiedLead. QualifiedLead nie je odoslanie formulára. Je to ručné označenie v databáze.
+- Message-matched URL (`/software/ai` a podobne), Calendly, video skripty, admin UI a attribution dashboard do zadania nepatria.
+- Meranie pred prvou platenou kampaňou je sekcia Meranie. Eventy: PageView, ViewContent, Lead. QualifiedLead nie je odoslanie formulára. Je to ručné označenie v databáze a do Meta pôjde až neskôr. Názvy LandingView, ContactView a FormSubmit sa nepoužijú.
 
 ## Hosting
 
@@ -119,7 +119,7 @@ MariaDB. Schéma ako SQL súbor v repozitári, ktorý sa dá spustiť raz.
 
 `status` len tieto hodnoty: `new`, `replied`, `call`, `won`, `not_fit`. Aplikácia ich v tejto verzii len zakladá ako `new`. Ďalší stav a `qualified` sa nastavujú v phpMyAdmin. Admin UI nestavaj.
 
-`qualified` ostáva NULL, kým lead niekto ručne označí. To je metrika QualifiedLead, nie stĺpec plnený formulárom.
+`qualified` ostáva NULL, kým lead niekto ručne označí. To je metrika QualifiedLead, nie stĺpec plnený formulárom. Atribučné stĺpce a `marketing_consent` dopĺňa sekcia Meranie. Hodnoty `status` sa v tejto verzii nemenia.
 
 IP neukladaj v čitateľnej podobe. `ip_hash` je SHA-256 z IP a tajného `IP_HASH_SALT`. User-Agent orež na 300 znakov.
 
@@ -138,22 +138,133 @@ V `.env.example`, bez hodnôt tajomstiev:
 - `IP_HASH_SALT`
 - `TURNSTILE_SKIP` (len lokálne)
 - `NODE_ENV`
+- `META_PIXEL_ID` (verejné ID, môže ísť do prehliadača)
+- `META_CAPI_ACCESS_TOKEN` (len server)
+- `META_GRAPH_VERSION` (stabilná verzia Graph API v čase implementácie)
+- `META_TEST_EVENT_CODE` (prázdne v ostrej prevádzke)
+- `META_OPT_IN_COUNTRIES` (čiarkou oddelené ISO kódy; predvolene EHP, `GB` a `CH`, ak premenná chýba)
 
 ## Privacy
 
-Pred ostrým prijatím leadov pridaj krátku anglickú stránku `/privacy/` a odkaz v pätičke funnelu aj na formulári vedľa vety „Your information will only be used to respond to your inquiry.“
+Stránka `/privacy/` a odkazy vo funneli už sú. Doplň na ňu body o Meta. Homepage firemnú pätičku nerozširuj; stačí existujúci odkaz na `/software/`.
 
 Text stránky:
 
 - prevádzkovateľ: enlightening.sk s.r.o., IČO 54864895, michal@enlightening.sk
 - účel: posúdenie dopytu pred prípadnou zmluvou
-- čo sa ukladá: polia formulára, čas, hash IP, user agent
+- čo sa ukladá: polia formulára, čas, hash IP, user agent, UTM parametre, `fbclid`, príznak marketingového súhlasu
 - ako dlho: 24 mesiacov od odoslania, ak z dopytu nevznikne zmluva
 - mail s briefom ide na michal@enlightening.sk cez Resend
+- Meta Pixel a Conversions API slúžia na meranie reklamy
+- pri marketingovom súhlase ide do Meta hash emailu a mena (SHA-256), IP adresa, user agent, cookies `_fbp` a `_fbc` a identifikátor udalosti
+- bez marketingového súhlasu sa do Meta neposiela nič; brief sa aj tak uloží, aby sa dalo odpovedať
 
-Homepage firemnú pätičku nerozširuj o celý funnel. Stačí existujúci odkaz na `/software/`.
+Existujúce vety stránky nechaj.
 
-## Hotovo, keď
+## Meranie
+
+Pred prvou platenou kampaňou. Calendly, admin UI, `/software/ai`, attribution dashboard a ďalšie eventy nerob. QualifiedLead sa do Meta v tejto verzii neposiela.
+
+### Eventy
+
+| Kde | Event | Kedy |
+| --- | --- | --- |
+| `/software/` | PageView | Pixel, po marketingovom súhlase |
+| `/software/contact/` | PageView a ViewContent | Pixel, po marketingovom súhlase |
+| `POST /api/lead` vráti 2xx | Lead | Pixel aj CAPI, spoločné `event_id` |
+| `/software/thanks/` | PageView | Pixel, po marketingovom súhlase. Lead tu nie je |
+| ručne `qualified = 1` | QualifiedLead | až neskôr, len CAPI |
+
+Klik na Tell me about your project event nespúšťa. Lead nespúšťa klik na Send ani otvorenie thank-you page. Lead vznikne, až keď backend uloží platný formulár.
+
+Pixel daj len na tieto tri funnel stránky. Homepage a `/privacy/` ho nemajú. `<noscript>` pixel nepoužívaj, lebo nevie počkať na súhlas.
+
+### Súhlas
+
+Necessary ide vždy. Marketing (Meta) ide podľa súhlasu. CAPI súhlas neobchádza.
+
+Pri servírovaní troch funnel stránok server doplní inline konfiguráciu: `pixelId` z `META_PIXEL_ID` a `consentMode` `opt_in` alebo `opt_out`. Pixel ID v gite natvrdo nie je. Token CAPI do prehliadača nepatrí. Ostatné HTML server nemení.
+
+Krajinu ber z Cloudflare hlavičky `CF-IPCountry`. `opt_in` platí pre kódy v `META_OPT_IN_COUNTRIES` a pre neznámu krajinu. `opt_out` platí pre ostatné. Predvolený zoznam, keď premenná chýba: krajiny EHP, `GB` a `CH`.
+
+- `opt_in`: Pixel sa nenačíta, kým návštevník marketing nepríjme.
+- `opt_out`: Pixel sa načíta, kým návštevník marketing nevypne.
+
+Banner je anglický, len na funnel stránkach, s voľbou prijať a odmietnuť a s odkazom na `/privacy/`. Voľbu ulož do first-party cookie. Bez `META_PIXEL_ID` banner ani Pixel neukazuj; formulár funguje ako doteraz.
+
+### Čo sa pamätá z návštevy
+
+Na funnel stránkach, keď URL obsahuje aspoň jeden z parametrov `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term`, `fbclid`, prepíš first-party cookie s týmito hodnotami. Návšteva bez nich cookie nemaže. Cookie je Necessary, nie Meta. Platnosť 90 dní. Prázdnu hodnotu neukladaj. K `fbclid` ulož čas prvého videnia v milisekundách a meň ho len keď sa zmení samotný `fbclid`.
+
+`_fbp` a `_fbc` zakladá Pixel až po súhlase. Pri submit ich prečítaj z cookies. Keď `_fbc` chýba a `fbclid` máme, server poskladá `fbc` ako `fb.1.{čas prvého videnia fbclid v ms}.{fbclid}`.
+
+### Formulár
+
+Ku JSON na `/api/lead` pridaj:
+
+| Pole | Pravidlo |
+| --- | --- |
+| `event_id` | UUID, ktoré prehliadač vygeneruje pred odoslaním |
+| `fbp` | cookie `_fbp`, inak prázdne |
+| `fbc` | cookie `_fbc`, inak prázdne |
+| `marketing_consent` | `true` len keď je marketing povolený |
+| `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term`, `fbclid` | z atribúčnej cookie |
+
+Existujúce polia a chybové správy nemení. Zlé alebo príliš dlhé atribúčné pole lead neodmietne: ulož NULL alebo orež. Chýbajúce `event_id` lead tiež neodmietne.
+
+Po HTTP 2xx, a len keď `marketing_consent` bolo true a Pixel beží, zavolaj `fbq('track', 'Lead', {}, { eventID })` s tým istým UUID. Pri chybe POST Lead nespúšťaj.
+
+### CAPI
+
+Až po úspešnom INSERTe, a len keď `marketing_consent` je true, `META_CAPI_ACCESS_TOKEN` je nastavený a `event_id` je UUID. Inak CAPI preskoč. Chýbajúci token proces nezastaví. Chyba CAPI thank-you page neblokuje, rovnako ako chyba Resend.
+
+`POST https://graph.facebook.com/{META_GRAPH_VERSION}/{META_PIXEL_ID}/events`
+
+V `data[0]`:
+
+- `event_name`: `Lead`
+- `event_time`: unix sekundy
+- `event_id`: UUID z formulára
+- `action_source`: `website`
+- `event_source_url`: `https://enlightening.sk/software/contact/`
+- `user_data.em`: SHA-256 hex z emailu po orezaní a lowercase
+- `user_data.fn` a voliteľne `ln`: SHA-256 hex. Meno rozdeľ len keď sú po orezaní presne dve slová. Inak celé meno ako `fn` a `ln` neposielaj
+- `user_data.client_ip_address`: IP z requestu, tá istá ako pre Turnstile
+- `user_data.client_user_agent`: User-Agent z requestu
+- `user_data.fbp` a `user_data.fbc`: bez hashu, keď existujú
+
+IP v čitateľnej podobe do databázy neukladaj. Hash pre CAPI neukladaj, počítaj ho pri odoslaní. Company do Meta neposielaj. Keď je `META_TEST_EVENT_CODE` nastavený, pridaj ho do tela ako `test_event_code`.
+
+### Databáza
+
+Nový SQL súbor s `ALTER TABLE`. `CREATE TABLE IF NOT EXISTS` v `sql/schema.sql` stĺpce na existujúcej tabuľke nedoplní. `CHECK` na `status` nemení.
+
+Marketingový návrh hodnôt `qualified`, `unqualified`, `contacted`, `lost` do `status` neprenášaj. Pipeline ostáva `new`, `replied`, `call`, `won`, `not_fit`. Kvalita je stĺpec `qualified`: NULL ešte neposúdené, 1 QualifiedLead, 0 nie. Nastaví sa SQL príkazom. Admin UI nestavaj.
+
+K `leads` pridaj, prázdne ako NULL:
+
+- `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term` VARCHAR(200) NULL
+- `fbclid` VARCHAR(512) NULL
+- `fbp` VARCHAR(255) NULL
+- `fbc` VARCHAR(512) NULL
+- `meta_event_id` CHAR(36) NULL
+- `marketing_consent` TINYINT(1) NOT NULL DEFAULT 0
+
+`fbp`, `fbc`, email, meno, user agent a `marketing_consent` majú zostať kvôli neskoršiemu QualifiedLead. Ten event dostane nové `event_id`, nie id Leadu, a pôjde len pri `qualified = 1` a `marketing_consent = 1`. V tejto verzii ho neposielaj.
+
+### Hotovo, keď
+
+- jeden platný submit so súhlasom vloží riadok s UTM, `fbclid`, `fbp` a `meta_event_id`; Pixel Lead a CAPI Lead majú to isté `event_id` a v Meta Test Events zostane po deduplikácii jeden Lead
+- refresh `/software/thanks/` ďalší Lead nevytvorí
+- submit bez marketingového súhlasu lead uloží a Pixel ani CAPI nezavolá
+- klik na Tell me about your project ViewContent ani Lead nespustí
+- chýbajúci CAPI token stále vráti 200 a otvorí thank-you page
+- `/privacy/` popisuje Pixel, CAPI a čo sa pri súhlase posiela
+- v gite nie je Pixel ID ani CAPI token
+
+## Hotovo pre uloženie formulára
+
+Toto už v repozitári platí.
 
 - lokálne `POST /api/lead` s platným telom vloží riadok a server vráti 200
 - neplatná voľba, prázdny projekt, honeypot, príliš rýchle odoslanie a šiestý pokus za hodinu lead nevytvoria
