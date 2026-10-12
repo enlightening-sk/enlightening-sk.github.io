@@ -18,6 +18,10 @@ Nerobiť: gradienty všade, stock fotky programátorov, animované blobs, vymysl
 
 Po redesigne skontrolovať mobil skôr než desktop. Pre tento funnel je mobil pravdepodobne dôležitejší.
 
+## Stav
+
+Úlohy z časti nižšie sú spravené v `software/index.html` a `software/funnel.css`. Formulár a thank-you page ostali v pôvodnej šírke a so svojimi kartami. Body v diskusii (fotka, technology strip, availability, škrty textu, výsledkové lockupy, kratšie vety) sa nerobili.
+
 ## Úlohy, ktoré vieme urobiť hneď
 
 Netreba nový asset, nový claim ani zmenu viet. Pracuje sa s tým, čo už je v `software/index.html`. Mení sa len prezentácia v `software/funnel.css` a rozloženie landingu. Formulár a thank-you page sa nechajú úzke, ako sú.
