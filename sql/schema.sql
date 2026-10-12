@@ -16,6 +16,16 @@ CREATE TABLE IF NOT EXISTS leads (
   qualified TINYINT(1) NULL,
   ip_hash CHAR(64) NULL,
   user_agent VARCHAR(300) NULL,
+  utm_source VARCHAR(200) NULL,
+  utm_medium VARCHAR(200) NULL,
+  utm_campaign VARCHAR(200) NULL,
+  utm_content VARCHAR(200) NULL,
+  utm_term VARCHAR(200) NULL,
+  fbclid VARCHAR(512) NULL,
+  fbp VARCHAR(255) NULL,
+  fbc VARCHAR(512) NULL,
+  meta_event_id CHAR(36) NULL,
+  marketing_consent TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (id),
   CONSTRAINT leads_status_chk CHECK (status IN ('new', 'replied', 'call', 'won', 'not_fit'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

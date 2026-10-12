@@ -9,6 +9,7 @@ import {
   type StoredLead,
 } from "./db.js";
 import { notifyLead } from "./mail.js";
+import { readLeadMeta, sendLeadEvent } from "./meta.js";
 import { verifyTurnstile } from "./turnstile.js";
 
 const MAX_BODY = 65_536;
@@ -140,6 +141,12 @@ function userAgentOf(c: Context): string | null {
   return agent.slice(0, 300);
 }
 
+function userAgentRaw(c: Context): string | null {
+  const agent = c.req.header("user-agent")?.trim();
+  if (!agent) return null;
+  return agent.slice(0, 1024);
+}
+
 function dbError(error: unknown): string {
   return error instanceof Error ? error.message : "database error";
 }
@@ -204,10 +211,11 @@ export async function handleLead(c: Context): Promise<Response> {
 
   const lead = validateLead(parsed);
   if (!lead) return fail(c, 400);
+  const meta = readLeadMeta(parsed);
 
   let id: number;
   try {
-    id = await insertLead(lead, ipHash, userAgentOf(c));
+    id = await insertLead(lead, ipHash, userAgentOf(c), meta);
   } catch (error) {
     console.error(dbError(error));
     return fail(c, 500);
@@ -217,6 +225,21 @@ export async function handleLead(c: Context): Promise<Response> {
     await notifyLead(env, lead);
   } catch (error) {
     console.error(`lead notify failed for ${id}: ${error instanceof Error ? error.message : "mail error"}`);
+  }
+
+  try {
+    await sendLeadEvent(env, {
+      marketingConsent: meta.marketingConsent,
+      eventId: meta.eventId,
+      email: lead.email,
+      name: lead.name,
+      ip,
+      userAgent: userAgentRaw(c),
+      fbp: meta.fbp,
+      fbc: meta.fbc,
+    });
+  } catch (error) {
+    console.error(`lead capi failed for ${id}: ${error instanceof Error ? error.message : "capi error"}`);
   }
 
   return c.json({ ok: true }, 200, { "cache-control": "no-store" });

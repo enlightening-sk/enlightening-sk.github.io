@@ -1,6 +1,9 @@
+import { type NonSharedBuffer } from "node:buffer";
 import { realpath, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import type { Context } from "hono";
+import { getEnv } from "./env.js";
+import { consentModeForCountry, funnelPixelTag } from "./meta.js";
 
 const root = path.resolve(import.meta.dirname, "..");
 
@@ -9,6 +12,7 @@ const PUBLIC_PREFIXES = ["software/", "privacy/"];
 const PUBLIC_EXTENSIONS = new Set([
   ".html",
   ".css",
+  ".js",
   ".png",
   ".jpg",
   ".jpeg",
@@ -18,6 +22,12 @@ const PUBLIC_EXTENSIONS = new Set([
   ".txt",
   ".xml",
   ".webmanifest",
+]);
+
+const FUNNEL_HTML = new Set([
+  "software/index.html",
+  "software/contact/index.html",
+  "software/thanks/index.html",
 ]);
 
 function isInside(parent: string, child: string): boolean {
@@ -63,6 +73,8 @@ function contentType(rel: string): string {
       return "text/html; charset=utf-8";
     case ".css":
       return "text/css; charset=utf-8";
+    case ".js":
+      return "text/javascript; charset=utf-8";
     case ".xml":
       return "application/xml; charset=utf-8";
     case ".txt":
@@ -89,7 +101,25 @@ function cacheControl(rel: string): string {
   return rel.endsWith(".html") ? "no-cache" : "public, max-age=86400";
 }
 
-async function fileResponse(rel: string, method: string): Promise<Response | null> {
+function injectFunnelPixel(html: string, country: string | undefined): string | null {
+  const env = getEnv();
+  if (!env.metaPixelId) return null;
+  const tag = funnelPixelTag(
+    env.metaPixelId,
+    consentModeForCountry(country, env.metaOptInCountries),
+  );
+  if (!tag) return null;
+  const marker = "</head>";
+  const at = html.indexOf(marker);
+  if (at < 0) return null;
+  return `${html.slice(0, at)}${tag}\n${html.slice(at)}`;
+}
+
+async function fileResponse(
+  rel: string,
+  method: string,
+  country: string | undefined,
+): Promise<Response | null> {
   if (!isPublicFile(rel)) return null;
   const abs = path.resolve(root, rel);
   if (!isInside(root, abs)) return null;
@@ -108,13 +138,32 @@ async function fileResponse(rel: string, method: string): Promise<Response | nul
 
   const info = await stat(realFile);
   if (!info.isFile()) return null;
-  const body = method === "HEAD" ? null : await readFile(realFile);
+
+  const funnel = FUNNEL_HTML.has(realRel);
+  let body: NonSharedBuffer | null = null;
+  let length = info.size;
+  let cache = cacheControl(realRel);
+  if (method !== "HEAD" || funnel) {
+    const file = await readFile(realFile);
+    body = file;
+    length = file.byteLength;
+    if (funnel) {
+      const html = injectFunnelPixel(file.toString("utf8"), country);
+      if (html !== null) {
+        body = Buffer.from(html, "utf8");
+        length = body.byteLength;
+        cache = "private, no-cache";
+      }
+    }
+  }
+  if (method === "HEAD") body = null;
+
   return new Response(body, {
     status: 200,
     headers: {
       "content-type": contentType(realRel),
-      "content-length": String(info.size),
-      "cache-control": cacheControl(realRel),
+      "content-length": String(length),
+      "cache-control": cache,
       "x-content-type-options": "nosniff",
     },
   });
@@ -123,11 +172,12 @@ async function fileResponse(rel: string, method: string): Promise<Response | nul
 export async function servePublic(c: Context): Promise<Response> {
   const pathname = safePathname(new URL(c.req.url).pathname);
   if (!pathname) return c.text("Bad request", 400);
+  const country = c.req.header("cf-ipcountry");
 
   const rel = pathname.slice(1);
   if (pathname.endsWith("/") || rel === "") {
     const indexRel = rel === "" ? "index.html" : `${rel}index.html`;
-    const response = await fileResponse(indexRel, c.req.method);
+    const response = await fileResponse(indexRel, c.req.method, country);
     return response ?? c.text("Not found", 404);
   }
 
@@ -144,6 +194,6 @@ export async function servePublic(c: Context): Promise<Response> {
     return c.text("Not found", 404);
   }
 
-  const response = await fileResponse(rel, c.req.method);
+  const response = await fileResponse(rel, c.req.method, country);
   return response ?? c.text("Not found", 404);
 }

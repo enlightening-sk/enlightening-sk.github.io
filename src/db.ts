@@ -1,6 +1,7 @@
 import mysql from "mysql2/promise";
 import type { ResultSetHeader, RowDataPacket } from "mysql2";
 import { getEnv } from "./env.js";
+import type { LeadMeta } from "./meta.js";
 
 const env = getEnv();
 
@@ -44,11 +45,14 @@ export async function insertLead(
   lead: StoredLead,
   ipHash: string,
   userAgent: string | null,
+  meta: LeadMeta,
 ): Promise<number> {
   const [result] = await pool.execute<ResultSetHeader>(
     `INSERT INTO leads
-      (help, project, engagement, budget, start_when, name, email, company, status, ip_hash, user_agent)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'new', ?, ?)`,
+      (help, project, engagement, budget, start_when, name, email, company, status, ip_hash, user_agent,
+       utm_source, utm_medium, utm_campaign, utm_content, utm_term,
+       fbclid, fbp, fbc, meta_event_id, marketing_consent)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'new', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       lead.help,
       lead.project,
@@ -60,6 +64,16 @@ export async function insertLead(
       lead.company,
       ipHash,
       userAgent,
+      meta.utmSource,
+      meta.utmMedium,
+      meta.utmCampaign,
+      meta.utmContent,
+      meta.utmTerm,
+      meta.fbclid,
+      meta.fbp,
+      meta.fbc,
+      meta.eventId,
+      meta.marketingConsent ? 1 : 0,
     ],
   );
   return result.insertId;

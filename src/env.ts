@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { parseOptInCountries } from "./meta.js";
 
 export type Env = {
   host: string;
@@ -16,6 +17,11 @@ export type Env = {
   turnstileSecret: string;
   turnstileSkip: boolean;
   ipHashSalt: string;
+  metaPixelId: string;
+  metaCapiAccessToken: string;
+  metaGraphVersion: string;
+  metaTestEventCode: string;
+  metaOptInCountries: ReadonlySet<string>;
 };
 
 const root = path.resolve(import.meta.dirname, "..");
@@ -87,6 +93,19 @@ export function getEnv(): Env {
     );
   }
 
+  const metaPixelId = (process.env.META_PIXEL_ID ?? "").trim();
+  if (metaPixelId && !/^\d{1,32}$/.test(metaPixelId)) {
+    console.error("META_PIXEL_ID must be a numeric Pixel ID; the pixel will not load");
+  }
+  const metaCapiAccessToken = (process.env.META_CAPI_ACCESS_TOKEN ?? "").trim();
+  if (!metaCapiAccessToken) {
+    console.error("META_CAPI_ACCESS_TOKEN is missing; Conversions API will be skipped");
+  }
+  const metaGraphVersion = (process.env.META_GRAPH_VERSION ?? "").trim() || "v26.0";
+  if (!/^v\d+\.\d+$/.test(metaGraphVersion)) {
+    console.error("META_GRAPH_VERSION must look like v26.0; Conversions API will be skipped");
+  }
+
   cached = {
     host: process.env.HOST || "127.0.0.1",
     port: requirePort("PORT", "3000"),
@@ -102,6 +121,11 @@ export function getEnv(): Env {
     turnstileSecret,
     turnstileSkip: skipAsked && nodeEnv !== "production",
     ipHashSalt: requireValue("IP_HASH_SALT"),
+    metaPixelId,
+    metaCapiAccessToken,
+    metaGraphVersion,
+    metaTestEventCode: (process.env.META_TEST_EVENT_CODE ?? "").trim(),
+    metaOptInCountries: parseOptInCountries(process.env.META_OPT_IN_COUNTRIES),
   };
   return cached;
 }

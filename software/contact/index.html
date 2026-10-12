@@ -139,11 +139,23 @@ Company ID (IČO): 54864895<br/>
 
 </div>
 
+<script src="/software/measure.js"></script>
 <script>
 document.getElementById("y").textContent = new Date().getFullYear();
 
 var FORM_ENDPOINT = "/api/lead";
 var loadedAt = Date.now();
+
+function readCookie(name) {
+  var prefix = name + "=";
+  var parts = document.cookie ? document.cookie.split("; ") : [];
+  for (var i = 0; i < parts.length; i++) {
+    if (parts[i].indexOf(prefix) !== 0) continue;
+    try { return decodeURIComponent(parts[i].slice(prefix.length)); }
+    catch (ignore) { return ""; }
+  }
+  return "";
+}
 
 var form = document.getElementById("brief");
 var error = document.getElementById("form-error");
@@ -158,6 +170,20 @@ form.addEventListener("submit", function (event) {
 
   var data = Object.fromEntries(new FormData(form).entries());
   data.loadedAt = loadedAt;
+  var eventId = "";
+  try { eventId = crypto.randomUUID(); } catch (ignore) {}
+  data.event_id = eventId;
+  data.fbp = readCookie("_fbp");
+  data.fbc = readCookie("_fbc");
+  data.marketing_consent = window.funnelMarketingAllowed ? window.funnelMarketingAllowed() === true : false;
+  var visit = window.funnelVisit ? window.funnelVisit() : {};
+  data.utm_source = typeof visit.utm_source === "string" ? visit.utm_source : "";
+  data.utm_medium = typeof visit.utm_medium === "string" ? visit.utm_medium : "";
+  data.utm_campaign = typeof visit.utm_campaign === "string" ? visit.utm_campaign : "";
+  data.utm_content = typeof visit.utm_content === "string" ? visit.utm_content : "";
+  data.utm_term = typeof visit.utm_term === "string" ? visit.utm_term : "";
+  data.fbclid = typeof visit.fbclid === "string" ? visit.fbclid : "";
+  if (typeof visit.fbclid_ts === "number") data.fbclid_ts = visit.fbclid_ts;
   if (window.turnstile && !data["cf-turnstile-response"]) {
     try {
       var token = turnstile.getResponse();
@@ -171,11 +197,25 @@ form.addEventListener("submit", function (event) {
     body: JSON.stringify(data)
   }).then(function (response) {
     if (!response.ok) throw new Error("request failed");
+    if (data.marketing_consent === true && eventId && window.funnelTrackLead) {
+      window.funnelTrackLead(eventId);
+    }
     try {
       var brief = Object.assign({}, data);
       delete brief.company_website;
       delete brief["cf-turnstile-response"];
       delete brief.loadedAt;
+      delete brief.event_id;
+      delete brief.fbp;
+      delete brief.fbc;
+      delete brief.fbclid_ts;
+      delete brief.marketing_consent;
+      delete brief.utm_source;
+      delete brief.utm_medium;
+      delete brief.utm_campaign;
+      delete brief.utm_content;
+      delete brief.utm_term;
+      delete brief.fbclid;
       sessionStorage.setItem("software-brief", JSON.stringify(brief));
     } catch (ignore) {}
     location.href = "/software/thanks/";
