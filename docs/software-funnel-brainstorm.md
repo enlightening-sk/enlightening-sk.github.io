@@ -2,7 +2,7 @@
 
 Interný záznam z komunikácie s marketingovým agentom, 9. a 10. októbra 2026.
 Customer-facing texty sú v angličtine, lebo cieľové publikum je USA.
-Implementačné zadanie je v `docs/software-funnel-implementation.md`. Tento súbor je zdroj textov a marketingových rozhodnutí.
+Implementačné zadanie je v `docs/software-funnel-implementation.md`. Vizuálna spätná väzba z 12. októbra 2026 a rozdelenie úloh sú v `docs/software-funnel-visual.md`. Tento súbor je zdroj textov a marketingových rozhodnutí.
 
 Homepage `enlightening.sk` zostáva firemná stránka. Funnel je samostatná vetva. Homepage je už preložená do angličtiny; agent ju videl ešte v slovenčine. Slovenskú verziu webu nerobíme.
 

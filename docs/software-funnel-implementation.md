@@ -6,7 +6,7 @@ Customer-facing text je anglický. Cieľové publikum je USA. Slovenskú verziu 
 
 ## Čo už je v repozitári
 
-Nemeň text ani štruktúru týchto stránok, okrem bodov v sekciách Úpravy formulára, Privacy a Meranie.
+Nemeň text ani štruktúru týchto stránok, okrem bodov v sekciách Úpravy formulára, Privacy a Meranie. Vizuálny prepis landingu je samostatné zadanie v `docs/software-funnel-visual.md` a do tohto zadania nepatrí.
 
 - `index.html` — anglická firemná homepage. Odkaz na software engineering vedie na `/software/`.
 - `software/index.html` — landing. Bez bežnej navigácie. Logo vedie na `/`.
